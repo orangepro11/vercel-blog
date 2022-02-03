@@ -12,7 +12,7 @@ export const links: LinksFunction = () => {
 
 export default function Blog() {
 	return (
-		<div className='flex justify-center'>
+		<div className='mx-auto max-w-xs sm:max-w-prose'>
 			<div className='prose lg:prose-xl py-10'>
 				<Outlet />
 			</div>
