@@ -1170,6 +1170,10 @@ Ensure the default browser behavior of the `hidden` attribute.
   .sm\:max-w-prose {
     max-width: 65ch;
   }
+
+  .sm\:max-w-2xl {
+    max-width: 42rem;
+  }
 }
 
 @media (min-width: 768px) {
@@ -1399,6 +1403,10 @@ Ensure the default browser behavior of the `hidden` attribute.
 
   .lg\:max-w-none {
     max-width: none;
+  }
+
+  .lg\:max-w-2xl {
+    max-width: 42rem;
   }
 
   .lg\:grid-cols-3 {
