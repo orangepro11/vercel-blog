@@ -1,0 +1,305 @@
+---
+title: First Post！
+meta: 
+  title: Second Post！
+  description: 这是我的第一篇文章
+---
+
+## 虚拟环境配置
+
+万事先从虚拟环境配置开始
+
+```shell
+virtualenv env
+
+env\Scripts\activate
+```
+
+## 安装 django
+
+```shell
+pip install django
+```
+
+安装着突然发现不对劲，这装的是 4.0.1，赶紧装回稳定版本
+
+```
+pip install django==3.2
+```
+
+## 用 django 初始化项目
+
+```
+django-admin startproject blog .
+```
+
+注意最后的点，表示原地初始化项目，不要再给我再套一次文件夹了。
+
+## 添加一个应用模块
+
+```
+python manage.py startapp home
+```
+
+看到目录下多出 home 文件夹就算成功。
+
+## 开始定义模型
+
+到了这一步就可以直接开干了，在 home/models.py 里
+
+```python
+from django.db import models
+
+class BlogModel(models.Model):
+    title = models.CharField(max_length=1000)
+    content = models.TextField()
+    image = models.ImageField(upload_to='blog')
+    created_at = models.DateTimeField(auto_now_add=True)
+    upload_to = models.DateTimeField(auto_now=True)
+
+```
+
+## 定义视图
+
+```python
+from django.shortcuts import render
+
+
+# Create your views here.
+def index(request):
+    pass
+```
+
+没错就是啥也没写，先别管那么多，跑起来再说。
+
+## 添加路由
+
+去 blog 文件夹里把 url.py 给复制一份过来，把上面注释全删掉（不删也行，随你）
+
+```python
+from django.urls import path
+from . import views
+
+
+urlpatterns = [
+    path('', views.index),
+]
+
+```
+
+## 注册应用
+
+虽然一步一步快接近成功了但还早着，先去 blog/settings.py 里说明一下加载这个应用模块。
+
+```python
+# Application definition
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'home', # 添加这一项
+]
+```
+
+## 在总路由里引入
+
+blog/urls.py
+
+```python
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('',  include('home.urls')),
+]
+```
+
+## 生成模型
+
+快成功了，还差几步
+
+在命令行执行
+
+```shell
+pyrhon manage.py createmigrations
+```
+
+这一步如果没有报错之后几步也就基本没什么问题了，看到 home 模块正确加载算成功。
+
+## 让模型实体化
+
+```shell
+python manage.py migrate
+```
+
+## 让应用跑起来
+
+```
+python manage.py runserver
+```
+
+好了现在已经迈出了第一步。
+
+## 创建超级管理员账户
+
+```shell
+python manage.py createsuperuser
+```
+
+按照提示输入用户名，邮箱，密码即可。
+
+注意这一步必须要在 migrate 之后。
+
+## 访问后台
+
+现在直接访问 localhost:8080 是报错的，因为我们的视图函数返回的不是一个合法的 http 响应，不必管他，我们直接访问 localhost:8080/admin，输入用户名，密码登录，点开 Blog Mode，点击创建一条。
+
+## 集成 markdown 编辑器
+
+默认的 TextArea 显然不能满足我们的需求，所有要集成 mdeditor。
+
+```shell
+pip install django-mdeditor
+```
+
+## 把 mdeditor 注册为应用
+
+```python
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'mdeditor', # 新增这行
+    'home',
+]
+```
+
+## 在模型里引用
+
+```python
+from mdeditor.fields import MDTextField   # 导入md编辑器
+
+
+
+class BlogModel(models.Model):
+    title = models.CharField(max_length=1000)
+    content = MDTextField()  # 更改此项，注意为MDTextField()
+    image = models.ImageField(upload_to='blog')
+    created_at = models.DateTimeField(auto_now_add=True)
+    upload_to = models.DateTimeField(auto_now=True)
+```
+
+## 配置媒体上传
+
+还没完，md 编辑器作为富文本编辑器肯定要满足图片上传的需求的，目前暂时往服务器上存，以后再集成七牛云存储。
+
+settting.py，在行末添加
+
+```python
+MEDIA_URL = '/media/'
+X_FRAME_OPTIONS = 'SAMEORIGIN' # 注意这行必须，关掉CSRF验证，否则图片上传会跨域
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+```
+
+CSRF 的问题留到集成七牛云存储的时候再解决。
+
+## 配置 media 路由
+
+注意还没完，上一步我们配置了 media 文件夹，但是服务器还认识，需要指定一下路由。
+
+```python
+from django.contrib import admin
+from django.urls import path, include, re_path
+from django.views.static import serve
+from django.conf import settings
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('',  include('home.urls')),
+    path('mdeditor/', include('mdeditor.urls')), # 新增，指定mdeditor的资源路径
+    re_path('media/(?P<path>.*)', serve, {
+        'document_root': settings.MEDIA_ROOT
+    }, name = 'media') # 新增，指定media的路径
+]
+
+```
+
+重启项目，检查效果。
+
+注意以上一步都不能少，否则会出现意料之外的问题。
+
+## 添加 slug
+
+home/helpers 下
+
+```python
+from django.utils.text import slugify
+import string
+import random
+
+
+# 生成随机字符串
+def generate_random_string(len = 12):
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=len))
+
+def generate_slug(text):
+    from home.models import BlogModel
+    new_slug = slugify(text)
+    if BlogModel.objects.filter(slug = new_slug).first():
+        return generate_slug(text + generate_random_string(5))
+    return new_slug
+
+```
+
+有了 slug 生成的逻辑就可以在模型里调用了，关键是要覆写原本的 save 方法
+
+```python
+from django.db import models
+from django.contrib.auth.models import User
+from mdeditor.fields import MDTextField   # 必须导入
+from .helpers import generate_slug
+
+
+
+class BlogModel(models.Model):
+    title = models.CharField(max_length=1000)
+    content = MDTextField()  # 注意为MDTextField()
+    slug = models.SlugField(max_length=1000, null=True, blank=True)
+    image = models.ImageField(upload_to='blog')
+    created_at = models.DateTimeField(auto_now_add=True)
+    upload_to = models.DateTimeField(auto_now=True)
+
+    # 方便打印
+    def __str__(self):
+        return self.title
+
+    # 覆盖save方法
+    def save(self, *args, **kwargs):
+        self.slug = generate_slug(self.title)
+        super(BlogModel, self).save(*args, **kwargs)
+```
+
+记得改完后要模型迁移：
+
+```
+python manage.py makemigrations
+
+python manage.py migrate
+```
+
+## 静态文件配置
+
+静态文件目录是一个项目必要的
+
+```python
+from django.conf import settings
+from djangoj.contrib.staticfiles.urls import staticfiles_urlpatterns
+```
