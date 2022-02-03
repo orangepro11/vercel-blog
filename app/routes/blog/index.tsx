@@ -1,11 +1,12 @@
 import * as firstPost from './first-post.mdx';
 import * as secondPost from './second-post.mdx';
-import {LoaderFunction, useLoaderData,Link} from 'remix'
+import { LoaderFunction, useLoaderData, Link } from 'remix'
 
 function postFromModule(mod: any) {
 	return {
 		slug: mod.filename.replace(/\.mdx?$/, ''),
 		...mod?.attributes?.meta,
+		tags: (mod?.attributes?.tags || "").split(',')
 	}
 }
 
@@ -23,7 +24,7 @@ export default function BlogIndex() {
 		<div>
 			<h2>文章列表</h2>
 			<ul>
-				{posts.map((post:any) => (
+				{posts.map((post: any) => (
 					<li key={post.slug}>
 						<Link to={`/blog/${post.slug}`}>
 							{post.title}
