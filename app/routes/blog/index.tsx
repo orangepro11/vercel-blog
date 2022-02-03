@@ -25,7 +25,7 @@ export default function BlogIndex() {
 			<ul>
 				{posts.map((post:any) => (
 					<li key={post.slug}>
-						<Link to="/blog/[slug]">
+						<Link to={`/blog/${post.slug}`}>
 							{post.title}
 						</Link>
 
