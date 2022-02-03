@@ -1425,6 +1425,14 @@ Ensure the default browser behavior of the `hidden` attribute.
     max-width: 20rem;
   }
 
+  .lg\:max-w-3xl {
+    max-width: 48rem;
+  }
+
+  .lg\:max-w-4xl {
+    max-width: 56rem;
+  }
+
   .lg\:grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
