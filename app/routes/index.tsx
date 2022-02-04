@@ -30,7 +30,7 @@ export default function BlogIndex() {
           流动的音符拨动心弦
         </p>
       </div>
-      <div className="grid mx-auto max-w-lg lg:max-w-none gap-5 grid-cols-1 lg:grid-cols-3 pb-4">
+      <div className="grid mx-auto max-w-lg lg:max-w-none gap-5 grid-cols-1 lg:grid-cols-3 pb-4 lg:px-8">
         {
           posts.map((post: BlogCardProps) => {
             return (

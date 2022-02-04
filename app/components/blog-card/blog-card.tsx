@@ -23,7 +23,7 @@ const BlogCard: React.FunctionComponent<BlogCardProps> = (props) => {
 							))
 						}
 					</div>
-					<h3 className="mt-2 text-3xl leading-9 font-semibold text-gray-900">
+					<h3 className="mt-2 text-3xl lg:text-xl leading-9 font-semibold text-gray-900">
 						{props.title}
 					</h3>
 					<p className="mt-3 text-base leading-6 text-gray-600">{props.description}</p>
