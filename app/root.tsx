@@ -12,17 +12,17 @@ import type { MetaFunction } from "remix";
 import styles from './tailwind.css';
 
 export const links: LinksFunction = () => {
-	return [
-		{
-			rel: 'stylesheet',
-			href: styles
-		}
-	]
+  return [
+    {
+      rel: 'stylesheet',
+      href: styles
+    }
+  ]
 };
 
 
 export const meta: MetaFunction = () => {
-  return { title: "New Remix App" };
+  return { title: "橙子的极简blog" };
 };
 
 export default function App() {
