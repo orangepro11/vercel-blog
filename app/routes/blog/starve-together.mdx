@@ -1,0 +1,296 @@
+---
+meta: 
+  title: 饥荒联机版搭建教程
+  description: 使用docker快速搭建饥荒联机版
+  image: https://images.unsplash.com/photo-1643779374814-3abaf4546e30?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80
+  date: 2022-02-05
+  sort: 3
+  tags: Linux服务器,饥荒联机版
+---
+
+
+
+## 准备材料
+
+一个Linux服务器，本文使用为centOS操作系统，配置以4核4G以上为佳。
+
+
+
+## 安装python3.8+
+
+这将是唯一的难点了，我就是在这卡了半天，注意python官网没有Linux的一键安装包，yum仓库的安装包版本是3.6左右，**无法满足我们的需求**
+
+
+
+1. 安装必要的编译工具链
+
+```
+ yum -y install zlib-devel bzip2-devel openssl openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel
+```
+
+
+
+2. 找一个合适的目录安家
+
+```
+cd ~
+```
+
+
+
+3. 下载pyhon3.10的源码（这是直到本文编写的时候的最新版本）
+
+```
+wget https://www.python.org/ftp/python/3.10.1/Python-3.10.1.tgz
+```
+
+
+
+4. 解压
+
+```
+tar -zxf Python-3.10.1.tgz
+
+cd ./Python-3.10.1
+```
+
+
+
+5. 创建python3安装的目标文件夹（这个最好不要随便改名）
+
+```
+mkdir -p /usr/local/python3
+```
+
+
+
+6. 配置cmake
+
+```
+./configure --prefix=/usr/local/python3 --enable-shared
+```
+
+
+
+7. 编译
+
+```
+make && make install
+```
+
+
+
+8. 创建软连接（注意不要替换原本的python2）
+
+```
+ln -s /usr/local/python3/bin/python3.10 /usr/bin/python3
+
+ln -s /usr/local/python3/bin/pip3.10 /usr/bin/pip3
+```
+
+
+
+## 安装docker
+
+这是为了抹平环境差异，个人环境千奇百怪极有可能安装失败，docker提供了统一的虚拟机接口，保证环境隔离。
+
+```
+curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+
+systemctl enable docker 
+
+systemctl start docker 
+```
+
+
+
+## 安装docker-compose
+
+这是docker官方维护的镜像构建工具。
+
+1. 下载
+
+```
+sudo curl -L "https://get.daocloud.io/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose && sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose && docker-compose --version
+```
+
+
+
+2. 添加可执行权限
+
+```
+chmod +x /usr/local/bin/docker-compose
+```
+
+
+
+3. 创建软链接
+
+```
+ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+```
+
+   
+
+4. 检查一下有没有安装成功
+
+```
+docker-compose --version
+```
+
+
+
+## 构建服务器镜像
+
+
+
+此步骤可以在任意目录下进行。
+
+
+
+1. clone源码
+
+```
+git clone --depth=1 https://github.com/wdw87/dst-detected-server-docker.git
+
+cd dst-detected-server-docker
+```
+
+
+
+2. 修改配置文件
+
+可供修改的配置文件有2处，分别是info.ini和mods.ini，其中info.ini是必须去配置的。
+
+
+
+此文件注释齐全，可看着修改，我会讲解以下参数都从哪里获取
+
+```ini
+#格式：名字,密码,描述,游戏模式,token
+#中间以逗号分割，注意是英文逗号，不要换行
+#游戏模式，可选 survival, endless or wilderness，与玩家死亡后的负面影响有关
+dockerServerTest,12345,喵喵喵,endless,pds-g^KU_AfBJ-Ieg^iJGfGPmPtSK6NRbHFHHZGOBxvIMaZgmAU+cCQ8MEoCI=
+```
+
+
+
+## 去获取启动游戏需要的参数
+
+1. 打开steam，启动**饥荒联机版**
+2. 界面左下角点击【账号】
+
+![image-20220205191924609](https://qiniu.buaihechengzizhi.com/img/image-20220205191924609.png)
+
+点击后会启动steam的内置浏览器，稍作等待。
+
+
+
+3. 点击上面的【游戏】
+
+<img src="https://qiniu.buaihechengzizhi.com/img/image-20220205192149839.png" alt="image-20220205192149839"  />
+
+
+
+3. 选择【饥荒联机版的游戏服务器】
+
+![image-20220205192250736](https://qiniu.buaihechengzizhi.com/img/image-20220205192250736.png)
+
+
+
+4. 在弹出来的界面填写服务器的名字，然后点击添加新服务器，根据向导完成即可。
+
+![image-20220205192346051](https://qiniu.buaihechengzizhi.com/img/image-20220205192346051.png)
+
+
+
+5. 获取token
+
+![image-20220205192441845](https://qiniu.buaihechengzizhi.com/img/image-20220205192441845.png)
+
+把游戏名和token复制走，回到第一步的info.ini
+
+
+
+info.ini
+
+```ini
+# 名字,密码,描述,游戏模式,token
+```
+
+
+
+现在第一个名字和最后一个token都有了，密码你自己填，描述你自己填，游戏模式是[survival],[endless],[wilderness]中的一个（不要把方括号也复制走！）。
+
+
+
+## 启动配置脚本
+
+1. 运行py文件
+
+```shell
+python3 start.py
+```
+
+
+
+2. 授予权限（重要！）
+
+```
+chmod -R a+w ./data
+```
+
+
+
+3. 构建镜像
+
+```
+cd ./data
+
+docker-compose up
+```
+
+这一步是最慢的，需要去hub拉取镜像，耐心等待即可。
+
+
+
+## 服务器操作
+
+
+
+1. 启动主世界
+
+```
+docker start dst_master -d
+```
+
+
+
+2. 启动洞穴
+
+```
+docker start dst_caves -d
+```
+
+
+
+3.  停止主世界
+
+```
+docker stop dst_master -d
+```
+
+
+
+4. 停止洞穴
+
+```
+docker stop dst_caves -d
+```
+
+
+
+
+
+
+

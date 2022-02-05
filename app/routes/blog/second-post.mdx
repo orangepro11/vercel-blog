@@ -1,13 +1,255 @@
 ---
 meta: 
-  title: 第二篇测试文章！
-  description: 这是我的第二篇文章
+  title: FastAPI入门！
+  description: 简单的FastAPI入门教学
   image: https://images.unsplash.com/photo-1643779374814-3abaf4546e30?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80
   date: 2022-02-03
   sort: 2
-  tags: 二次元
+  tags: python.web,api,FastAPI
 ---
 
-## 这是第二个文章
+## 
 
-此文章没有代码
+## 使用FastAPI的好处
+
+1. 是**python框架**里最快的API框架
+2. 内置Swagger UI支持，自动构建易读的API文档
+3. 现代化的python语法
+4. 响应体自动JSON化（像Django，Flask这种想要返回JSON体还要手动序列化一下）
+5. 编辑器语法支持良好
+6. 简洁的OAuth2授权机制和JWT授权机制
+7. Websocket支持
+8. GraphQL支持
+9. 异步任务支持
+10. SQL支持，NoSQL支持
+
+
+
+## 让我们开始吧
+
+说了这么多好处，不如让我们直接开始进入实战环节吧
+
+
+
+## 虚拟环境
+
+为每一个项目单独创建虚拟环境是个良好的习惯。
+
+在你的项目文件夹下：
+
+
+
+### 安装（如果已经安装可以跳过这步）
+
+```
+pip install virtualenv 
+```
+
+
+
+## 激活
+
+```shell
+virtualenv env
+
+source env/Scripts/activate
+```
+
+(windows的cmd不需要source，如果你想source推荐用[mobaxterm](https://mobaxterm.mobatek.net/))
+
+> 如果成功了，就可以看到终端上有(env)的标记
+
+
+
+## 安装fastapi
+
+```shell
+pip install fastapi
+```
+
+
+
+## 安装uvicorn
+
+这是ASGI的服务器（异步）
+
+```
+pip install uvicorn
+```
+
+
+
+## 小试牛刀
+
+使用你最喜欢的编辑器打开它项目目录。新建文件main.py，写入内容如下：
+
+
+
+```python
+from fastapi import FastAPI
+
+app = FastAPI()
+
+def index():
+	return "Hey"
+```
+
+因为代码过于简单就不多讲解。
+
+
+
+## 启动服务器（重点）
+
+```
+uvicorn main:app --reload
+```
+
+其中 main 指 main.py, reload表示自动热更新。
+
+启动成功后打开[localhost:8000](http://localhost:8000/)
+
+不出意外的话，你应该能看到：
+
+```
+{"detail":"Not Found"}
+```
+
+
+
+它告诉我们资源未找到（404），那我们究竟该如何指明index函数是用来处理首屏路由的呢？我们需要给它套上一个装饰器（decorator），现阶段你可以简单的理解为是java的注解。（两者在表现上有共通点，但本质上不同，注解本质是给编译器看的注释，装饰器则来源于一种设计模式）
+
+
+
+```python
+@app.get("/")
+def index():
+	return "Hey"
+```
+
+再次访问，发现可以正确输出"Hey"
+
+
+
+## 返回JSON格式
+
+在FastAPI中只要你返回字典类型（dictionary）就会自动被包装成JSON
+
+```python
+@app.get("/")
+def index():
+	return {
+        "code": 0,
+        "data": {
+            "msg": "Hello World"
+        }
+    }
+```
+
+
+
+## 封装响应模型
+
+每次都编写这么一大串太麻烦了，我们可以根据业务封装自己的响应模型，这样需要响应的时候只需要简单的调用一下就可以了。
+
+```python
+class Response():
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def success(payload):
+        return {
+            "code": 0,
+            "message": "ok",
+            "data": payload
+        }
+
+    @staticmethod
+    def error(code, message):
+        return {
+            "code": code,
+            "message": message
+        }
+
+```
+
+
+
+> 只需要简单的调用Response.success和Response.error即可。
+
+
+
+## 数据库操作
+
+
+
+### 安装依赖
+
+```
+pip install 
+```
+
+
+
+
+
+## 部署
+
+### 编写dockerfile
+
+```
+FROM python:3.9
+
+WORKDIR /code
+
+COPY ./requirements.txt /code/requirements.txt
+
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+COPY ./app /code/app
+
+# CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+
+# If running behind a proxy like Nginx or Traefik add --proxy-headers
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
+
+```
+
+
+
+### 编译容器
+
+```
+docker build -t gal-api .
+```
+
+容器名字gal-api, .表示编译的上下文（取当前目录的dockerfile）
+
+
+
+### 启动容器
+
+```
+docker run -p 127.0.0.1:8000:8000 -v /nginx/websites/gal-api/logs:/logs -d  gal-api
+```
+
+-p表示端口映射，前面是主机端口，后面是容器端口
+
+-v表示数据卷映射，前面是主机目录，后面是容器里的目录
+
+-d表示不占用终端，后台运行
+
+
+
+### 删除所有运行中的容器
+
+```
+sudo docker rm $(sudo docker ps -a -q)
+```
+
+运行中的自然就会删除失败。
+
+
+
+
+

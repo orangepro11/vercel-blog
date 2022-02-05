@@ -1,5 +1,7 @@
 import * as firstPost from './blog/first-post.mdx';
 import * as secondPost from './blog/second-post.mdx';
+import * as StarveTogether from './blog/starve-together.mdx';
+
 import { LoaderFunction, useLoaderData, Link } from 'remix'
 
 import BlogCard, { BlogCardProps } from '~/components/blog-card/blog-card';
@@ -16,6 +18,7 @@ export const loader: LoaderFunction = () => {
   return [
     postFromModule(firstPost),
     postFromModule(secondPost),
+    postFromModule(StarveTogether),
   ].sort((a: any, b: any) => b.sort - a.sort)
 }
 
