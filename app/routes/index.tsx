@@ -1,5 +1,6 @@
 import * as secondPost from './blog/second-post.mdx';
 import * as StarveTogether from './blog/starve-together.mdx';
+import * as mc from './blog/minecraft-server.mdx';
 
 import { LoaderFunction, useLoaderData, Link } from 'remix'
 
@@ -17,6 +18,7 @@ export const loader: LoaderFunction = () => {
   return [
     postFromModule(secondPost),
     postFromModule(StarveTogether),
+    postFromModule(mc),
   ].sort((a: any, b: any) => b.sort - a.sort)
 }
 

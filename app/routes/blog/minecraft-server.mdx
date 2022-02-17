@@ -1,0 +1,248 @@
+---
+title: 搭建纯净版MineCraft服务器
+meta: 
+  title: 搭建纯净版MineCraft服务器
+  description: 纯净版服务器的搭建教程
+  keywords: minecraft,mc,docker
+  image: https://images.unsplash.com/photo-1638913975386-d61f0ec6500d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80
+  date: 2022-02-18
+  sort: 4
+  tags: 游戏,私服,mc
+---
+
+
+
+## 摘要
+
+本文将讲解如何在Linux服务器上搭建minecraft纯净版的服务器，本文使用的操作系统为ubuntu。
+
+
+
+## docker安装
+
+这是最简单的方式，只需要两步即可。
+
+
+
+### 安装docker
+
+```
+curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+
+systemctl enable docker 
+
+systemctl start docker 
+```
+
+
+
+### 编写启动脚本
+
+先找个合适的位置安家，如~/minecraft
+
+```shell
+docker run -d --name mc \
+  -e EULA=TRUE \
+  -e VERSION=1.18.1 \
+  -v $PWD/vanilla/data:/data \
+  -e ONLINE_MODE=FALSE \
+  -p 25565:25565 \
+  -p 25575:25575 \
+  --restart always \
+  itzg/minecraft-server
+```
+
+
+
+> ONLINE_MODE表示正版验证，如果为true，则必须需要官方启动器才能进入服务器，否则则允许第三方服务器。
+>
+> 运行后会自动拉取镜像并构建服务，只需要耐心等待并开放25565端口和25575端口就行。
+
+
+
+## java安装
+
+
+
+### 官方服务器端
+
+首先下载mc1.18.1的官方服务器版
+
+[跨平台 mc 1.18.1 jar包](https://launcher.mojang.com/v1/objects/125e5adf40c659fd3bce3e66e67a16bb49ecc1b9/server.jar)
+
+下载后上传到服务器或者直接在服务器上CURL上面的地址就行。
+
+
+
+### jdk17的安装
+
+1.18.1依赖jdk17版本，现在我们来安装它。
+
+因为本文使用的是ubuntu系统，所以我们可以简单的使用apt安装它。
+
+```
+add-apt-repository ppa:linuxuprising/java
+
+apt-get install oracle-java17-installer
+```
+
+> 安装完成后使用java --version查看版本。
+
+
+
+### 启动服务器
+
+```
+java -Xmx1024M -Xms1024M -jar server.jar  nogui
+```
+
+
+
+### 同意用户协议
+
+注意本次启动会自动失败，同时目录下多出来几个配置文件，我们先去修改eula.txt
+
+把elua改成true即可。
+
+```
+# Generated via Docker
+# Sun 13 Feb 2022 01:03:33 PM UTC
+eula=true
+
+```
+
+
+
+再次启动服务器
+
+```
+java -Xmx1024M -Xms1024M -jar server.jar  nogui
+```
+
+此时可以启动成功。
+
+
+
+## server.properties
+
+[wiki文档]([server.properties – Minecraft Wiki (fandom.com)](https://minecraft.fandom.com/wiki/Server.properties))
+
+
+
+```
+#Minecraft server properties
+#Tue Feb 15 15:23:06 UTC 2022
+enable-jmx-monitoring=false
+level-seed=
+rcon.port=25575
+enable-command-block=true
+gamemode=survival
+enable-query=false
+generator-settings=
+level-name=world
+motd=A Vanilla Minecraft Server powered by Docker
+query.port=25565
+texture-pack=
+pvp=true
+generate-structures=true
+difficulty=easy
+network-compression-threshold=256
+max-tick-time=60000
+require-resource-pack=false
+max-players=20
+use-native-transport=true
+online-mode=false
+enable-status=true
+allow-flight=false
+broadcast-rcon-to-ops=true
+view-distance=10
+max-build-height=256
+server-ip=
+resource-pack-prompt=
+allow-nether=true
+server-port=25565
+enable-rcon=true
+sync-chunk-writes=true
+op-permission-level=4
+prevent-proxy-connections=false
+hide-online-players=false
+resource-pack=
+entity-broadcast-range-percentage=100
+simulation-distance=10
+player-idle-timeout=0
+rcon.password=
+force-gamemode=false
+rate-limit=0
+hardcore=false
+white-list=false
+broadcast-console-to-ops=true
+spawn-npcs=true
+spawn-animals=true
+snooper-enabled=true
+function-permission-level=2
+level-type=DEFAULT
+text-filtering-config=
+spawn-monsters=true
+enforce-whitelist=false
+resource-pack-sha1=
+spawn-protection=16
+max-world-size=29999984
+
+```
+
+
+
+
+
+## 关于rcon
+
+即向服务器发送控制台命令的协议，mc服务器实现了此协议。
+
+无论是开源的rcon客户端还是提供此类的网站都很多，但是安全性需要自己斟酌考虑。
+
+使用rcon需要更改server.properties的一些配置项
+
+```
+rcon.port=25575 # rcon服务的端口号
+enable-rcon=true # 允许通过rcon连接
+rcon.password=xxx # 设置rcon的密码
+```
+
+
+
+## 连接到服务器
+
+
+
+1. 打开启动器，安装对应版本
+
+![image-20220218021146623](https://qiniu.buaihechengzizhi.com/img/image-20220218021146623.png)
+
+
+
+2. 点击多人游戏，点击添加服务器
+
+![image-20220218021516156](https://qiniu.buaihechengzizhi.com/img/image-20220218021516156.png)
+
+
+
+服务器地址填ip地址就行。
+
+
+
+3. 在列表里连接即可。
+
+
+
+> 启动服务器需要时间，刚启动的服务器大概需要2分钟才能进入房间。
+
+
+
+
+
+
+
+
+
+
+
