@@ -217,7 +217,7 @@ def unpublished():
 
 
 
-显然这是**它先匹配到了/blog/{id}**这个路由，value is not a valid integer就是这个控制器抛出来的异常，它把unpublished识别成了id，但是unpublished显然是个字符串不是数字。
+显然这是**它先匹配到了/blog/\{id\}**这个路由，value is not a valid integer就是这个控制器抛出来的异常，它把unpublished识别成了id，但是unpublished显然是个字符串不是数字。
 
 
 
