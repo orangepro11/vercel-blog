@@ -1,6 +1,7 @@
 import * as secondPost from './blog/second-post.mdx';
 import * as StarveTogether from './blog/starve-together.mdx';
 import * as mc from './blog/minecraft-server.mdx';
+import * as hbuview from './blog/HbuilderX-uview2.mdx';
 
 import { LoaderFunction, useLoaderData, Link } from 'remix'
 
@@ -19,6 +20,7 @@ export const loader: LoaderFunction = () => {
     postFromModule(secondPost),
     postFromModule(StarveTogether),
     postFromModule(mc),
+    postFromModule(hbuview)
   ].sort((a: any, b: any) => b.sort - a.sort)
 }
 

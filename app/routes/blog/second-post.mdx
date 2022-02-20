@@ -8,7 +8,7 @@ meta:
   tags: python.web,api,FastAPI
 ---
 
-## 
+
 
 ## 使用FastAPI的好处
 
@@ -179,21 +179,202 @@ class Response():
 
 
 
+## 代码是顺序执行的
+
+看如下例子：
+
+```python
+
+
+@app.get('/blog/{id}')
+def blog(id: int):
+    return {
+        "code": 0,
+        "data": {
+            "id": id,
+            "title": "FastAPI",
+        }
+    }
+
+@app.get('/blog/unpublished')
+def unpublished():
+    return {
+        "code": 0,
+        "data": [{
+            "id": 1,
+            "title": "FastAPI",
+        }]
+    }
+```
+
+
+
+我们来尝试访问 /blog/unpublished
+
+结果如下：
+
+![image-20220220195251711](https://qiniu.buaihechengzizhi.com/img/image-20220220195251711.png)
+
+
+
+显然这是**它先匹配到了/blog/{id}**这个路由，value is not a valid integer就是这个控制器抛出来的异常，它把unpublished识别成了id，但是unpublished显然是个字符串不是数字。
+
+
+
+解决方案就是调换一下位置：
+
+```python
+@app.get('/blog/unpublished')
+def unpublished():
+    return {
+        "code": 0,
+        "data": [{
+            "id": 1,
+            "title": "FastAPI",
+        }]
+    }
+
+@app.get('/blog/{id}')
+def blog(id: int):
+    return {
+        "code": 0,
+        "data": {
+            "id": id,
+            "title": "FastAPI",
+        }
+    }
+
+```
+
+这样代码在执行的时候就可以优先匹配到上面的路由了。
+
+
+
+## API文档
+
+FastAPI内置了swagger UI和redoc文档，我们来分别访问它。
+
+
+
+### SwaggerUI
+
+路由地址： /docs
+
+![image-20220220195839327](https://qiniu.buaihechengzizhi.com/img/image-20220220195839327.png)
+
+### ReDoc
+
+路由地址: /redoc
+
+
+
+![image-20220220195814187](https://qiniu.buaihechengzizhi.com/img/image-20220220195814187.png)
+
+
+
+> 两个文档各有特色。
+
+
+
+## 查询参数
+
+上面我们讲到了路径（Path）参数的定义方法，但是在HTTP协议中查询（Query）参数扮演着更加重要的角色。
+
+但是你不需要担心如何定义查询参数：FastAPI非常的智能，它知道哪些是路径参数哪些是查询参数。
+
+```python
+@app.get("/blog")
+def blog(limit):
+    return {
+      "code": 0,
+      "data":{
+          "msg": f"Blog List {limit} from the db"
+        }
+    }
+
+```
+
+
+
+访问 /blog?limit=15
+
+```json
+{
+    "code": 0,
+    "data": {
+        "msg": "Blog List 15 from the db"
+     }
+}
+```
+
+
+
+我们也同样可以给参数加上验证和默认参数：
+
+```python
+@app.get("/blog")
+def blog(limit: int = 10, published: bool = False):
+  if published:
+    return {
+      "code": 0,
+      "data":{
+          "msg": f"get {limit} published blog from db"
+        }
+    }
+  else: 
+    return {
+      "code": 0,
+      "data":{
+          "msg": f"get {limit} blog from db"
+        }
+    }
+
+```
+
+访问地址：blog?limit=15&published=false
+
+注意上面的limut和published均为可选参数。
+
+
+
+## 请求体
+
+想要接受响应体就必须**先定义Pydantic模型**。
+
+
+
+```python
+class Blog(BaseModel):
+  title: str
+  
+
+@app.post('/blog')
+def create_blog(blog:Blog):
+  return {
+    "code": 0,
+    "msg": "succeed"
+  }
+```
+
+
+
+
+
+
+
 ## 数据库操作
 
 
 
-### 安装依赖
-
-```
-pip install 
-```
 
 
 
 
+## 部署到生成环境
 
-## 部署
+使用docker部署将会非常简洁。
+
+
 
 ### 编写dockerfile
 
