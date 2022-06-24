@@ -1,53 +1,41 @@
-import * as secondPost from './blog/second-post.mdx';
-import * as StarveTogether from './blog/starve-together.mdx';
-import * as mc from './blog/minecraft-server.mdx';
-import * as hbuview from './blog/HbuilderX-uview2.mdx';
-
+import * as MC from './blog/minecraft-server.mdx';
+import * as ST from './blog/starve-together.mdx';
 import { LoaderFunction, useLoaderData, Link } from 'remix'
 
-import BlogCard, { BlogCardProps } from '~/components/blog-card/blog-card';
-
 function postFromModule(mod: any) {
-  return {
-    slug: mod.filename.replace(/\.mdx?$/, ''),
-    ...mod?.attributes?.meta,
-    tags: (mod?.attributes?.meta?.tags || "").split(',')
-  }
+	return {
+		slug: mod.filename.replace(/\.mdx?$/, ''),
+		...mod?.attributes?.meta,
+		tags: (mod?.attributes?.tags || "").split(',')
+	}
 }
 
 export const loader: LoaderFunction = () => {
-  return [
-    postFromModule(secondPost),
-    postFromModule(StarveTogether),
-    postFromModule(mc),
-    postFromModule(hbuview)
-  ].sort((a: any, b: any) => b.sort - a.sort)
+	return [
+		postFromModule(MC),
+		postFromModule(ST),
+	]
 }
 
 
 export default function BlogIndex() {
-  const posts = useLoaderData();
-  return (
-    <div className="bg-gray-50 py-16 px-4 h-screen">
-      <div className="text-center">
-        <h2 className="text-4xl leading-10 tracking-tight font-extrabold text-gray-900">From The Blog</h2>
-        <p className="mt-5 text-xl leading-7 text-gray-500">
-          流动的音符拨动心弦
-        </p>
-      </div>
-      <div className="grid mx-auto max-w-lg lg:max-w-none gap-5 grid-cols-1 lg:grid-cols-3 pb-4 lg:px-8">
-        {
-          posts.map((post: BlogCardProps) => {
-            return (
-              <div key={post.slug} className="mt-12">
-                <Link to={`/blog/${post.slug}`}>
-                  <BlogCard {...post} />
-                </Link>
-              </div>
-            )
-          })
-        }
-      </div>
-    </div>
-  )
+	const posts = useLoaderData();
+	return (
+		<div>
+			<h2>文章列表</h2>
+			<ul>
+				{posts.map((post: any) => (
+					<li key={post.slug}>
+						<Link to={`/blog/${post.slug}`}>
+							{post.title}
+						</Link>
+
+						{post.description ? (
+							<p className="m-0 lg:m-0">{post.description}</p>
+						) : null}
+					</li>
+				))}
+			</ul>
+		</div>
+	)
 }
