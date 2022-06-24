@@ -1,5 +1,5 @@
-import * as firstPost from './first-post.mdx';
-import * as secondPost from './second-post.mdx';
+import * as MS from './minecraft-server.mdx';
+import * as ST from './starve-together.mdx';
 import { LoaderFunction, useLoaderData, Link } from 'remix'
 
 function postFromModule(mod: any) {
@@ -12,8 +12,8 @@ function postFromModule(mod: any) {
 
 export const loader: LoaderFunction = () => {
 	return [
-		postFromModule(firstPost),
-		postFromModule(secondPost),
+		postFromModule(MS),
+		postFromModule(ST),
 	]
 }
 
